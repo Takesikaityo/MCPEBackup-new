@@ -66,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences pref = getSharedPreferences("version", MODE_PRIVATE);
-        if (pref.contains("3.2")) {
+        if (pref.contains("3.3")) {
         } else {
             SharedPreferences.Editor editor = pref.edit();
-            editor.putString("3.2", "version");
+            editor.putString("3.3", "version");
             editor.apply();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -125,7 +125,70 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable(){
             @Override
             public void run() {
-        //check_update();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                    .permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+                            // URL設定
+                            URL urlSt = new URL("https://raw.githubusercontent.com/Takesikaityo/MCPEBackup-new/master/update.json");
+                            // HTTP接続開始
+                            HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
+                            c.setRequestMethod("GET");
+                            c.connect();
+                            InputStream in = c.getInputStream();
+                            JSONObject jsonData = new JSONObject(readInputStream(in));
+                            String latest_version = jsonData.getString("latest_version");
+                            String emergency = jsonData.getString("emergency");
+                            Log.d("[Important]", latest_version);
+                            PackageManager pm = getApplicationContext().getPackageManager();
+                            String versionName = "unknown";
+                            try {
+                                PackageInfo packageInfo = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
+                                versionName = packageInfo.versionName;
+                            } catch (PackageManager.NameNotFoundException e) {
+                                e.printStackTrace();
+                            }
+
+                            if (latest_version.equals(versionName)) {
+                            } else {
+
+                            }if (emergency.equals(true)) {
+                            } else {
+                                String whats_new = jsonData.getString("whats_new");
+                                Log.d("[Important]", whats_new);
+                                //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
+                                AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
+                                //set title
+                                UpdateDialog.setTitle(getResources().getString(R.string.emergency));
+                                String update = getResources().getString(R.string.update);
+                                String ur_version = getResources().getString(R.string.your_version);
+                                String latest_ver = getResources().getString(R.string.latest_version);
+                                UpdateDialog.setMessage(update + "\n\nIMPORTANT!!! \n" + whats_new + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version);//set content
+                                UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
+                                UpdateDialog.setCancelable(false);
+                                UpdateDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                download();
+                                            }
+                                        });
+                                    }
+                                });
+                                UpdateDialog.create();
+                                UpdateDialog.show();
+                            }
+                        } catch (IOException | JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         }).start();
 
@@ -407,7 +470,7 @@ public class MainActivity extends AppCompatActivity {
     public void download() {
         try {
             // URL設定
-            URL url = new URL("https://drive.google.com/uc?id=0Bxp5wIuQibuSdU1BOWl0QUFVR0U");
+            URL url = new URL("https://github.com/Takesikaityo/MCPEBackup-new/raw/master/app/release/app-release.apk");
             // HTTP接続開始
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
             c.setRequestMethod("GET");
