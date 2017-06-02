@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">MCPEBackup</string>
+    <string name="large_text">詳細</string>
+    <string name="download">アプリを更新</string>
+    <string name="about">このアプリについて</string>
+    <string name="developer">開発者</string>
+
+    <string name="author">Name: プログラなーいたけし</string>
+    <string name="email">Email: piggtomop@gmail.com</string>
+    <string name="github_link">Github: https://github.com/Takesikaityo/MCPEBackup</string>
+    <string name="info">このアプリはMinecraftPE、および関連アプリをバックアップすることが可能です。</string>
+    <string name="update_new">3.1での新機能</string>
+    <string name="uudate_new1">一部表現を訂正</string>
+
+    <string name="terms">利用規約</string>
+    <string name="termsof">このアプリは自己責任でご使用ください。</string>
+    <string name="date">2017 4月</string>
+    <string name="ueda">プログラなーいたけし</string>
+    <string name="action_help">Help</string>
+    <string name="starts_backup">バックアップを開始します…</string>
+    <string name="done_backup">バックアップを完了しました。</string>
+    <string name="show">このバックアップをインストールを開始します。\n
+        このバックアップをインストールすると今のバージョンのMinecraftPEは削除されます。\n
+        データーの保存を外部にしている人はアンインストール時にデーターが消えることはありませんが、\n
+        アプリケーションにしている方はデーターが消えてしまいます。\n
+        手順１:アンインストールする。\n
+        手順２:インストール画面に従ってインストールする。
+    </string>
+    <string name="launch">MinecraftPEを起動しました</string>
+    <string name="title_activity_install">InstallActivity</string>
+    <string name="update">お使いのアプリのバージョンは最新ではありません。\n旧バージョンは不安定なため最新バージョンに更新することを強くお勧めします。</string>
+    <string name="your_version">現在のバージョン</string>
+    <string name="latest_version">最新バージョン</string>
+</resources>

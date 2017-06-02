@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="jp.takesi.mcpebackup.MainActivity">
+
+    <include layout="@layout/content_main"
+        android:id="@+id/include" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="49dp"
+        android:layout_height="50dp"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchorGravity="right|bottom"
+        app:srcCompat="@drawable/ic_launch_black_48dp"
+        app:layout_anchor="@+id/include"
+        tools:layout_editor_absoluteY="517dp"
+        tools:layout_editor_absoluteX="335dp" />
+
+</android.support.design.widget.CoordinatorLayout>

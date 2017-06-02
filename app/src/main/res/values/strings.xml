@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">MCPEBackup</string>
+    <string name="large_text">Details</string>
+    <string name="download">Update</string>
+    <string name="about">about</string>
+    <string name="developer">developer</string>
+
+    <string name="author">Name: Takesi</string>
+    <string name="email">Email: piggtomop@gmail.com</string>
+    <string name="github_link">Github: https://github.com/Takesikaityo/MCPEBackup</string>
+    <string name="info">This app can backups MinecraftPE and similar apps.</string>
+    <string name="update_new">What\'s New in 2.0?</string>
+    <string name="uudate_new1">MinercraftPE similar app can backup</string>
+
+    <string name="terms">Terms of service</string>
+    <string name="termsof">Use is self-responsibility.</string>
+    <string name="date">April 2017.</string>
+    <string name="ueda">Takesi</string>
+    <string name="action_help">help</string>
+    <string name="starts_backup">starts MCPE APK backup…</string>
+    <string name="done_backup">Done!</string>
+    <string name="show">I will install this backup.\n
+        When installing this backup, the current version of Minecraft PE will be deleted.\n
+        If you choosed ExternalStorage, you will not lost game datas.\n
+        but if you choosed application, you will lost all game datas.\n
+        step1 : uninstall MinecraftPE\n
+        step2 : install MinecraftPE
+    </string>
+    <string name="launch">launched MinecraftPE</string>
+    <string name="title_activity_install">InstallActivity</string>
+
+    <string name="update">Your version isn\'t latest version.\n We strongly recommend updating to the latest version because the old version is unstable.</string>
+    <string name="your_version"></string>
+    <string name="latest_version"></string>
+</resources>
