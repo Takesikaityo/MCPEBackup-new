@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
                                 .permitAll().build();
                         StrictMode.setThreadPolicy(policy);
                         // URL設定
-                        URL urlSt = new URL("https://drive.google.com/uc?id=0Bxp5wIuQibuSZkptOGl3NFA4RUk");
+                        URL urlSt = new URL("https://raw.githubusercontent.com/Takesikaityo/MCPEBackup-new/master/update.json");
                         // HTTP接続開始
                         HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
                         c.setRequestMethod("GET");
