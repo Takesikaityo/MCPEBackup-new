@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MCPEBackup</string>
     <string name="large_text">詳細</string>
-    <string name="download">アプリを更新</string>
+    <string name="download">アプリの更新をチェック</string>
     <string name="about">このアプリについて</string>
     <string name="developer">開発者</string>
 
@@ -14,7 +14,7 @@
 
     <string name="terms">利用規約</string>
     <string name="termsof">このアプリは自己責任でご使用ください。</string>
-    <string name="date">2017 4月</string>
+    <string name="date">2017 6月</string>
     <string name="ueda">プログラなーいたけし</string>
     <string name="action_help">Help</string>
     <string name="starts_backup">バックアップを開始します…</string>
@@ -28,6 +28,8 @@
     </string>
     <string name="launch">MinecraftPEを起動しました</string>
     <string name="title_activity_install">InstallActivity</string>
+
+    <string name="latest">更新の必要はありません。\nお使いのバージョンは最新バージョンです。</string>
     <string name="update">お使いのアプリのバージョンは最新ではありません。\n旧バージョンは不安定なため最新バージョンに更新することを強くお勧めします。</string>
     <string name="your_version">現在のバージョン</string>
     <string name="latest_version">最新バージョン</string>

@@ -17,11 +17,10 @@ import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,7 +43,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -68,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences pref = getSharedPreferences("version", MODE_PRIVATE);
-        if (pref.contains("3.1")) {
+        if (pref.contains("3.2")) {
         } else {
             SharedPreferences.Editor editor = pref.edit();
-            editor.putString("3.1", "version");
+            editor.putString("3.2", "version");
             editor.apply();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -127,62 +125,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable(){
             @Override
             public void run() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                            .permitAll().build();
-                    StrictMode.setThreadPolicy(policy);
-                    // URL設定
-                    URL urlSt = new URL("https://drive.google.com/uc?id=0Bxp5wIuQibuSZkptOGl3NFA4RUk");
-                    // HTTP接続開始
-                    HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
-                    c.setRequestMethod("GET");
-                    c.connect();
-                    InputStream in = c.getInputStream();
-                    JSONObject jsonData = new JSONObject(readInputStream(in));
-                    String latest_version = jsonData.getString("latest_version");
-                    Log.d("[Important]", latest_version);
-                    PackageManager pm = getApplicationContext().getPackageManager();
-                    String versionName = "unknown";
-                    try{
-                        PackageInfo packageInfo = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
-                        versionName = packageInfo.versionName;
-                    }catch(PackageManager.NameNotFoundException e){
-                        e.printStackTrace();
-                    }
-
-                    if (latest_version.equals(versionName)) {
-                    }else{
-                        String whats_new = jsonData.getString("whats_new");
-                        Log.d("[Important]", whats_new);
-                        //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
-                        AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
-                        //set title
-                        UpdateDialog.setTitle("UPDATE!");
-                        String update = getResources().getString(R.string.update);
-                        String ur_version = getResources().getString(R.string.your_version);
-                        String latest_ver = getResources().getString(R.string.latest_version);
-                        UpdateDialog.setMessage(update + "\n\nWHAT'S NEW? \n" + whats_new + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version);//set content
-                        UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
-                        UpdateDialog.setCancelable(false);
-                        UpdateDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                download();
-                            }
-                        });
-                        UpdateDialog.create();
-                        UpdateDialog.show();
-                    }
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
+        //check_update();
             }
-        });
-      }
         }).start();
 
 
@@ -376,6 +320,90 @@ public class MainActivity extends AppCompatActivity {
     private void output(String string){
         Log.d("[MCPEBackup]",string.toString());
     }
+
+    public void check_update(){
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                .permitAll().build();
+                        StrictMode.setThreadPolicy(policy);
+                        // URL設定
+                        URL urlSt = new URL("https://drive.google.com/uc?id=0Bxp5wIuQibuSZkptOGl3NFA4RUk");
+                        // HTTP接続開始
+                        HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
+                        c.setRequestMethod("GET");
+                        c.connect();
+                        InputStream in = c.getInputStream();
+                        JSONObject jsonData = new JSONObject(readInputStream(in));
+                        String latest_version = jsonData.getString("latest_version");
+                        Log.d("[Important]", latest_version);
+                        PackageManager pm = getApplicationContext().getPackageManager();
+                        String versionName = "unknown";
+                        try{
+                            PackageInfo packageInfo = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
+                            versionName = packageInfo.versionName;
+                        }catch(PackageManager.NameNotFoundException e){
+                            e.printStackTrace();
+                        }
+
+                        if (latest_version.equals(versionName)) {
+                            String whats_new = jsonData.getString("whats_new");
+                            Log.d("[Important]", whats_new);
+                            //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
+                            AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
+                            //set title
+                            UpdateDialog.setTitle("Your version is latest version.");
+                            String latest = getResources().getString(R.string.latest);
+                            String ur_version = getResources().getString(R.string.your_version);
+                            String latest_ver = getResources().getString(R.string.latest_version);
+                            UpdateDialog.setMessage( latest + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version + "\n\nWHAT'S NEW? \n" + whats_new);//set content
+                            UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
+                            UpdateDialog.setCancelable(true);
+                            UpdateDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            UpdateDialog.create();
+                            UpdateDialog.show();
+                        }else{
+                            String whats_new = jsonData.getString("whats_new");
+                            Log.d("[Important]", whats_new);
+                            //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
+                            AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
+                            //set title
+                            UpdateDialog.setTitle("UPDATE!");
+                            String update = getResources().getString(R.string.update);
+                            String ur_version = getResources().getString(R.string.your_version);
+                            String latest_ver = getResources().getString(R.string.latest_version);
+                            UpdateDialog.setMessage(update + "\n\nWHAT'S NEW? \n" + whats_new + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version);//set content
+                            UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
+                            UpdateDialog.setCancelable(true);
+                            UpdateDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            download();
+                                        }
+                                    });
+                                }
+                            });
+                            UpdateDialog.create();
+                            UpdateDialog.show();
+                        }
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+    }
+
     public void download() {
         try {
             // URL設定
@@ -402,15 +430,18 @@ public class MainActivity extends AppCompatActivity {
             }
             fos.close();
             is.close();
-            // Intent生成
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            // MIME type設定
-            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/MCPEBackups/tmp/" + "MCPEBackup.apk")), "application/vnd.android.package-archive");
-            // Intent発行
-            startActivity(intent);
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //https://medium.com/@ali.muzaffar/what-is-android-os-fileuriexposedexception-and-what-you-can-do-about-it-70b9eb17c6d0
+            Intent install = new Intent(Intent.ACTION_VIEW);
+            install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            // Old Approach
+            install.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/MCPEBackups/tmp/" + "MCPEBackup.apk")), "application/vnd.android.package-archive");
+            // End Old approach
+            // New Approach
+            Uri apkURI = FileProvider.getUriForFile(getApplicationContext(),getApplicationContext().getPackageName() + ".provider", (new File(Environment.getExternalStorageDirectory() + "/MCPEBackups/tmp/" + "MCPEBackup.apk")));
+            install.setDataAndType(apkURI, "application/vnd.android.package-archive");
+            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            // End New Approach
+            startActivity(install);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -439,7 +470,7 @@ public class MainActivity extends AppCompatActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            download();
+                            check_update();
                         }
                     });
                 }
