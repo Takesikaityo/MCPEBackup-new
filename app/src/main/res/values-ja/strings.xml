@@ -9,7 +9,7 @@
     <string name="email">Email: piggtomop@gmail.com</string>
     <string name="github_link">Github: https://github.com/Takesikaityo/MCPEBackup</string>
     <string name="info">このアプリはMinecraftPE、および関連アプリをバックアップすることが可能です。</string>
-    <string name="update_new">3.1での新機能</string>
+    <string name="update_new">3.3での新機能</string>
     <string name="uudate_new1">一部表現を訂正</string>
 
     <string name="terms">利用規約</string>
@@ -29,8 +29,14 @@
     <string name="launch">MinecraftPEを起動しました</string>
     <string name="title_activity_install">InstallActivity</string>
 
+    <string name="emergency">緊急！</string>
     <string name="latest">更新の必要はありません。\nお使いのバージョンは最新バージョンです。</string>
     <string name="update">お使いのアプリのバージョンは最新ではありません。\n旧バージョンは不安定なため最新バージョンに更新することを強くお勧めします。</string>
     <string name="your_version">現在のバージョン</string>
     <string name="latest_version">最新バージョン</string>
+
+    <string name="detils">詳細情報</string>
+    <string name="package_name">パッケージ名 : </string>
+    <string name="version_name">バージョン名 : </string>
+    <string name="lastupdate">最終更新日時 : </string>
 </resources>

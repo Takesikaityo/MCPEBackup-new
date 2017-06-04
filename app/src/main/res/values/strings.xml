@@ -9,7 +9,7 @@
     <string name="email">Email: piggtomop@gmail.com</string>
     <string name="github_link">Github: https://github.com/Takesikaityo/MCPEBackup</string>
     <string name="info">This app can backups MinecraftPE and similar apps.</string>
-    <string name="update_new">What\'s New in 2.0?</string>
+    <string name="update_new">What\'s New in 2.3?</string>
     <string name="uudate_new1">MinercraftPE similar app can backup</string>
 
     <string name="terms">Terms of service</string>
@@ -29,8 +29,14 @@
     <string name="launch">launched MinecraftPE</string>
     <string name="title_activity_install">InstallActivity</string>
 
+    <string name="emergency">Emergency!</string>
     <string name="latest">Your version is latest.</string>
     <string name="update">Your version isn\'t latest version.\n We strongly recommend updating to the latest version because the old version is unstable.</string>
     <string name="your_version">Your version</string>
     <string name="latest_version">Latest version</string>
+
+    <string name="detils">Detils</string>
+    <string name="package_name">Package name : </string>
+    <string name="version_name">Version name : </string>
+    <string name="lastupdate">Last Update : </string>
 </resources>
