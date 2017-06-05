@@ -59,29 +59,5 @@ public class InstallReceiver extends BroadcastReceiver {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
-
-        //Intent intent1 = new Intent(context, InstallActivity.class);
-        //intent1.putExtra("text", "Notification Activity");
-        // アクティビティが新しい空のタスクで起動するようにフラグを設定
-        //intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setAutoCancel(true)
-                        .setColor(ContextCompat.getColor(context,R.color.colorAccent))
-                        .setContentTitle("一件のアクティビティ")
-                        .setContentText(packageName + "のアプリがインストールされました。");
-        //Intent resultIntent = new Intent(context, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        //stackBuilder.addParentStack(MainActivity.class);
-        //stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManagerCompat manager = NotificationManagerCompat.from(context.getApplicationContext());
-        manager.notify(1, mBuilder.build());
     }
 }

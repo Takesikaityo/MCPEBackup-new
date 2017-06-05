@@ -1,6 +1,7 @@
 package jp.takesi.mcpebackup;
 
 import android.Manifest;
+import android.app.LauncherActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,9 +18,9 @@ import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -44,12 +45,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.jar.Attributes;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -68,10 +72,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences pref = getSharedPreferences("version", MODE_PRIVATE);
-        if (pref.contains("3.1")) {
+        if (pref.contains("4.1")) {
         } else {
             SharedPreferences.Editor editor = pref.edit();
-            editor.putString("3.1", "version");
+            editor.putString("4.1", "version");
             editor.apply();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -127,62 +131,70 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable(){
             @Override
             public void run() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                            .permitAll().build();
-                    StrictMode.setThreadPolicy(policy);
-                    // URL設定
-                    URL urlSt = new URL("https://drive.google.com/uc?id=0Bxp5wIuQibuSZkptOGl3NFA4RUk");
-                    // HTTP接続開始
-                    HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
-                    c.setRequestMethod("GET");
-                    c.connect();
-                    InputStream in = c.getInputStream();
-                    JSONObject jsonData = new JSONObject(readInputStream(in));
-                    String latest_version = jsonData.getString("latest_version");
-                    Log.d("[Important]", latest_version);
-                    PackageManager pm = getApplicationContext().getPackageManager();
-                    String versionName = "unknown";
-                    try{
-                        PackageInfo packageInfo = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
-                        versionName = packageInfo.versionName;
-                    }catch(PackageManager.NameNotFoundException e){
-                        e.printStackTrace();
-                    }
-
-                    if (latest_version.equals(versionName)) {
-                    }else{
-                        String whats_new = jsonData.getString("whats_new");
-                        Log.d("[Important]", whats_new);
-                        //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
-                        AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
-                        //set title
-                        UpdateDialog.setTitle("UPDATE!");
-                        String update = getResources().getString(R.string.update);
-                        String ur_version = getResources().getString(R.string.your_version);
-                        String latest_ver = getResources().getString(R.string.latest_version);
-                        UpdateDialog.setMessage(update + "\n\nWHAT'S NEW? \n" + whats_new + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version);//set content
-                        UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
-                        UpdateDialog.setCancelable(false);
-                        UpdateDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                download();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                    .permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+                            // URL設定
+                            URL urlSt = new URL("https://raw.githubusercontent.com/Takesikaityo/MCPEBackup-new/master/update.json");
+                            // HTTP接続開始
+                            HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
+                            c.setRequestMethod("GET");
+                            c.connect();
+                            InputStream in = c.getInputStream();
+                            JSONObject jsonData = new JSONObject(readInputStream(in));
+                            String latest_version = jsonData.getString("latest_version");
+                            String emergency = jsonData.getString("emergency");
+                            Log.d("[Important]", latest_version);
+                            PackageManager pm = getApplicationContext().getPackageManager();
+                            String versionName = "unknown";
+                            try {
+                                PackageInfo packageInfo = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
+                                versionName = packageInfo.versionName;
+                            } catch (PackageManager.NameNotFoundException e) {
+                                e.printStackTrace();
                             }
-                        });
-                        UpdateDialog.create();
-                        UpdateDialog.show();
+
+                            if (latest_version.equals(versionName)) {
+                            } else {
+                                if (emergency.equals(true)) {
+                                    String whats_new = jsonData.getString("whats_new");
+                                    Log.d("[Important]", whats_new);
+                                    //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
+                                    AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
+                                    //set title
+                                    UpdateDialog.setTitle(getResources().getString(R.string.emergency));
+                                    String update = getResources().getString(R.string.update);
+                                    String ur_version = getResources().getString(R.string.your_version);
+                                    String latest_ver = getResources().getString(R.string.latest_version);
+                                    UpdateDialog.setMessage(update + "\n\nIMPORTANT!!! \n" + whats_new + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version);//set content
+                                    UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
+                                    UpdateDialog.setCancelable(false);
+                                    UpdateDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            handler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    download();
+                                                }
+                                            });
+                                        }
+                                    });
+                                    UpdateDialog.create();
+                                    UpdateDialog.show();
+                                } else {
+                                }
+                            }
+                        } catch (IOException | JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
+                });
             }
-        });
-      }
         }).start();
 
 
@@ -196,34 +208,93 @@ public class MainActivity extends AppCompatActivity {
             }
 
             lv = (ListView) findViewById(R.id.listview);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, songList);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, songList);
             lv.setAdapter(adapter);
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     ListView listView = (ListView) parent;
-                    String item = (String) listView.getItemAtPosition(position);
-                    try {
-                        Toast.makeText(getApplicationContext(), R.string.show, Toast.LENGTH_LONG).show();
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Uri uri = Uri.fromParts("package", "com.mojang.minecraftpe", null);
-                    Intent intent = new Intent(Intent.ACTION_DELETE, uri);
-                    startActivity(intent);
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    String fileName = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
-                    Intent intent1 = new Intent(Intent.ACTION_VIEW);
-                    intent1.setDataAndType(Uri.fromFile(new File(fileName)), "application/vnd.android.package-archive");
-                    startActivity(intent1);
+                    final String item = (String) listView.getItemAtPosition(position);
+                        PackageManager pm = getPackageManager();
+                        final PackageInfo info = pm.getPackageArchiveInfo(Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item,PackageManager.GET_ACTIVITIES);
+                        Log.i("ActivityInfo", "Package name is " + info.packageName);
+                    Log.i("[ActivityInfo]", "Version name is " + info.versionName);
+                    Log.i("ActivityInfo", "LastUpdate time is " + info.lastUpdateTime);
+                    String package_name = getResources().getString(R.string.package_name);
+                    String version_name = getResources().getString(R.string.version_name);
+                    String lastupdate = getResources().getString(R.string.lastupdate);
+
+                    AlertDialog.Builder builder =  new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle(getResources().getString(R.string.detils));
+                    builder.setMessage(package_name + info.packageName + "\n" + version_name + info.versionName + "\n" + lastupdate + info.lastUpdateTime);
+                    builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    Uri uri = Uri.fromParts("package", info.packageName, null);
+                                    Intent intent = new Intent(Intent.ACTION_DELETE, uri);
+                                    startActivity(intent);
+                                    try {
+                                        Thread.sleep(5000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    String fileName = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+                                    //medium.com/@ali.muzaffar/what-is-android-os-fileuriexposedexception-and-what-you-can-do-about-it-70b9eb17c6d0
+                                    Intent install = new Intent(Intent.ACTION_VIEW);
+                                    install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    //qiita.com/AbeHaruhiko/items/d3255fb6abb48fd8761a
+                                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                        Uri apkURI = FileProvider.getUriForFile(getApplicationContext(),getApplicationContext().getPackageName() + ".provider", ((new File(fileName))));
+                                        install.setDataAndType(apkURI, "application/vnd.android.package-archive");
+                                        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    }else{
+                                        install.setDataAndType(Uri.fromFile(new File(fileName)), "application/vnd.android.package-archive");
+                                    }
+                                    startActivity(install);
+                                }
+                            });
+                    builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    builder.show();
                 }
             });
+
+            lv.setOnItemLongClickListener(
+                    new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(AdapterView parent, View view, final int position, long id) {
+                            ListView listView = (ListView) parent;
+                            final String item = (String) listView.getItemAtPosition(position);
+                            final String fileName = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle(item)
+                                    .setMessage(getResources().getString(R.string.delete))
+                                    .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            new File(fileName).delete();
+                                            songList.remove(position);
+                                            adapter.notifyDataSetChanged();
+                                            dialog.dismiss();
+                                        }
+                                    })
+                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    })
+                                    .show();
+
+                            return true;
+                        }
+                    });
 
             Intent intent = getIntent();
             Bundle bundle = intent.getExtras();
@@ -376,10 +447,94 @@ public class MainActivity extends AppCompatActivity {
     private void output(String string){
         Log.d("[MCPEBackup]",string.toString());
     }
+
+    public void check_update(){
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                .permitAll().build();
+                        StrictMode.setThreadPolicy(policy);
+                        // URL設定
+                        URL urlSt = new URL("https://raw.githubusercontent.com/Takesikaityo/MCPEBackup-new/master/update.json");
+                        // HTTP接続開始
+                        HttpsURLConnection c = (HttpsURLConnection) urlSt.openConnection();
+                        c.setRequestMethod("GET");
+                        c.connect();
+                        InputStream in = c.getInputStream();
+                        JSONObject jsonData = new JSONObject(readInputStream(in));
+                        String latest_version = jsonData.getString("latest_version");
+                        Log.d("[Important]", latest_version);
+                        PackageManager pm = getApplicationContext().getPackageManager();
+                        String versionName = "unknown";
+                        try{
+                            PackageInfo packageInfo = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
+                            versionName = packageInfo.versionName;
+                        }catch(PackageManager.NameNotFoundException e){
+                            e.printStackTrace();
+                        }
+
+                        if (latest_version.equals(versionName)) {
+                            String whats_new = jsonData.getString("whats_new");
+                            Log.d("[Important]", whats_new);
+                            //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
+                            AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
+                            //set title
+                            UpdateDialog.setTitle("Your version is latest version.");
+                            String latest = getResources().getString(R.string.latest);
+                            String ur_version = getResources().getString(R.string.your_version);
+                            String latest_ver = getResources().getString(R.string.latest_version);
+                            UpdateDialog.setMessage( latest + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version + "\n\nWHAT'S NEW? \n" + whats_new);//set content
+                            UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
+                            UpdateDialog.setCancelable(true);
+                            UpdateDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            UpdateDialog.create();
+                            UpdateDialog.show();
+                        }else{
+                            String whats_new = jsonData.getString("whats_new");
+                            Log.d("[Important]", whats_new);
+                            //Thanks! http://slumbers99.blogspot.jp/2012/01/android.html
+                            AlertDialog.Builder UpdateDialog = new AlertDialog.Builder(MainActivity.this);
+                            //set title
+                            UpdateDialog.setTitle("UPDATE!");
+                            String update = getResources().getString(R.string.update);
+                            String ur_version = getResources().getString(R.string.your_version);
+                            String latest_ver = getResources().getString(R.string.latest_version);
+                            UpdateDialog.setMessage(update + "\n\nWHAT'S NEW? \n" + whats_new + "\n\n" + ur_version + " : " + versionName + "\n" + latest_ver + " : " + latest_version);//set content
+                            UpdateDialog.setIcon(R.mipmap.ic_launcher);//set icon
+                            UpdateDialog.setCancelable(true);
+                            UpdateDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            download();
+                                        }
+                                    });
+                                }
+                            });
+                            UpdateDialog.create();
+                            UpdateDialog.show();
+                        }
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+    }
+
     public void download() {
         try {
             // URL設定
-            URL url = new URL("https://drive.google.com/uc?id=0Bxp5wIuQibuSdU1BOWl0QUFVR0U");
+            URL url = new URL("https://github.com/Takesikaityo/MCPEBackup-new/raw/master/app/release/app-release.apk");
             // HTTP接続開始
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
             c.setRequestMethod("GET");
@@ -402,15 +557,18 @@ public class MainActivity extends AppCompatActivity {
             }
             fos.close();
             is.close();
-            // Intent生成
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            // MIME type設定
-            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/MCPEBackups/tmp/" + "MCPEBackup.apk")), "application/vnd.android.package-archive");
-            // Intent発行
-            startActivity(intent);
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //medium.com/@ali.muzaffar/what-is-android-os-fileuriexposedexception-and-what-you-can-do-about-it-70b9eb17c6d0
+            Intent install = new Intent(Intent.ACTION_VIEW);
+            install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            //qiita.com/AbeHaruhiko/items/d3255fb6abb48fd8761a
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Uri apkURI = FileProvider.getUriForFile(getApplicationContext(),getApplicationContext().getPackageName() + ".provider", (new File(Environment.getExternalStorageDirectory() + "/MCPEBackups/tmp/" + "MCPEBackup.apk")));
+                install.setDataAndType(apkURI, "application/vnd.android.package-archive");
+                install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                 }else{
+                install.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/MCPEBackups/tmp/" + "MCPEBackup.apk")), "application/vnd.android.package-archive");
+            }
+            startActivity(install);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -439,7 +597,7 @@ public class MainActivity extends AppCompatActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            download();
+                            check_update();
                         }
                     });
                 }
@@ -463,8 +621,8 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
             return true;
         }
-        if (id == R.id.developer) {
-            startActivity(new Intent(this, DeveloperActivity.class));
+        if (id == R.id.github) {
+            customTabsIntent.launchUrl(this, Uri.parse("https://github.com/Takesikaityo/MCPEBackup-new"));
             return true;
         }
         if (id == R.id.action_help) {
@@ -473,5 +631,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
