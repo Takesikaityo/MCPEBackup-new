@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle("MCPEBackup " + BuildConfig.VERSION_NAME);
         setContentView(R.layout.activity_main);
         MeasurementGAManager.sendGAScreen(this, "MainActivity");
         MeasurementGAManager.sendGAEvent(MainActivity.this, "APP", "launched", "起動");
