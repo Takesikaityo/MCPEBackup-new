@@ -9,7 +9,7 @@
     <string name="email">Email: piggtomop@gmail.com</string>
     <string name="github_link">Github: https://github.com/Takesikaityo/MCPEBackup</string>
     <string name="info">このアプリはMinecraftPE、および関連アプリをバックアップすることが可能です。</string>
-    <string name="update_new">4.1での新機能</string>
+    <string name="update_new">3.3での新機能</string>
     <string name="uudate_new1">一部表現を訂正</string>
 
     <string name="terms">利用規約</string>
@@ -40,5 +40,5 @@
     <string name="version_name">バージョン名 : </string>
     <string name="lastupdate">最終更新日時 : </string>
 
-    <string name="delete">このバックアップを削除しますか？\n削除してしまうと復元できません。</string>
+    <string name="delete">このバックアップを削除してよろしいですか？\n一度、削除すると復元できません。</string>
 </resources>

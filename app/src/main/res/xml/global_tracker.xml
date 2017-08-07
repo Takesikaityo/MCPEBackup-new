@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="ga_sessionTimeout">300</integer>
+    <bool name="ga_autoActivityTracking">false</bool>
+    <!-- Idは任意のものに変更してください -->
+    <string name="ga_trackingId">UA-91023663-3</string>
+</resources>

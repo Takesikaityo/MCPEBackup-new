@@ -1,7 +1,6 @@
 package jp.takesi.mcpebackup;
 
 import android.Manifest;
-import android.app.LauncherActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,14 +21,12 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.nispok.snackbar.SnackbarManager;
 
@@ -53,7 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.jar.Attributes;
+import jp.takesi.mcpebackup.MeasurementGAManager;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -70,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        MeasurementGAManager.sendGAScreen(this, "MainActivity");
+        MeasurementGAManager.sendGAEvent(MainActivity.this, "APP", "launched", "起動");
         SharedPreferences pref = getSharedPreferences("version", MODE_PRIVATE);
         if (pref.contains("4.1")) {
         } else {
@@ -197,14 +195,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
-
         String sdPath = Environment.getExternalStorageDirectory() + "/MCPEBackups/";
         files = new File(sdPath).listFiles();
         if (files != null) {
+            List<File> apks = new ArrayList<File>();
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isFile() && files[i].getName().endsWith(".apk")) {
-                    songList.add(files[i].getName());
+                    apks.add(new File(files[i].getName()));
                 }
+            }
+            Collections.sort(apks, new SortFileName());
+            for (Object o : apks) {
+                songList.add(o.toString());
             }
 
             lv = (ListView) findViewById(R.id.listview);
@@ -227,10 +229,16 @@ public class MainActivity extends AppCompatActivity {
 
                     AlertDialog.Builder builder =  new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle(getResources().getString(R.string.detils));
+
+                    info.applicationInfo.sourceDir  = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+                    info.applicationInfo.publicSourceDir = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+                    builder.setIcon(info.applicationInfo.loadIcon(pm));
+
                     builder.setMessage(package_name + info.packageName + "\n" + version_name + info.versionName + "\n" + lastupdate + info.lastUpdateTime);
                     builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    MeasurementGAManager.sendGAEvent(MainActivity.this, "BackupInstall", "BackupInstall", "BackupInstall");
                                     dialog.dismiss();
                                     Uri uri = Uri.fromParts("package", info.packageName, null);
                                     Intent intent = new Intent(Intent.ACTION_DELETE, uri);
@@ -258,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
                     builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    MeasurementGAManager.sendGAEvent(MainActivity.this, "BackupInstall", "BackupInfoClose", "BackupInfoClose");
                                     dialog.dismiss();
                                 }
                             });
@@ -269,24 +278,37 @@ public class MainActivity extends AppCompatActivity {
                     new AdapterView.OnItemLongClickListener() {
                         @Override
                         public boolean onItemLongClick(AdapterView parent, View view, final int position, long id) {
+                            MeasurementGAManager.sendGAEvent(MainActivity.this, "Backup", "DeleteDialogShow", "DeleteDialog表示");
                             ListView listView = (ListView) parent;
                             final String item = (String) listView.getItemAtPosition(position);
                             final String fileName = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+
+                            PackageManager pm = getPackageManager();
+                            final PackageInfo info = pm.getPackageArchiveInfo(Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item,PackageManager.GET_ACTIVITIES);
+                            info.applicationInfo.sourceDir  = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+                            info.applicationInfo.publicSourceDir = Environment.getExternalStorageDirectory() + "/MCPEBackups/" + item;
+
                             new AlertDialog.Builder(MainActivity.this)
                                     .setTitle(item)
+                                    .setIcon(info.applicationInfo.loadIcon(pm))
                                     .setMessage(getResources().getString(R.string.delete))
                                     .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
+                                            MeasurementGAManager.sendGAEvent(MainActivity.this, "Backup", "Delete", "削除");
                                             new File(fileName).delete();
                                             songList.remove(position);
                                             adapter.notifyDataSetChanged();
                                             dialog.dismiss();
+                                            SnackbarManager.show(
+                                                    com.nispok.snackbar.Snackbar.with(MainActivity.this)
+                                                            .text("Done!"));
                                         }
                                     })
                                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
+                                            MeasurementGAManager.sendGAEvent(MainActivity.this, "Backup", "DeleteCalcel", "削除キャンセル");
                                             dialog.dismiss();
                                         }
                                     })
@@ -307,6 +329,7 @@ public class MainActivity extends AppCompatActivity {
                     PackageManager pm = this.getPackageManager();
                     String versionName = "";
                     try {
+                        MeasurementGAManager.sendGAEvent(MainActivity.this, "Backup", "StartBackup", app);
                         SnackbarManager.show(
                                 com.nispok.snackbar.Snackbar.with(this)
                                         .text(R.string.starts_backup));
@@ -373,10 +396,18 @@ public class MainActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.setAction("android.intent.category.LAUNCHER");
-                    intent.setClassName("com.mojang.minecraftpe", "com.mojang.minecraftpe.MainActivity");
-                    startActivity(intent);
+                    boolean isAppInstalled = appInstalledOrNot("com.mojang.minecraftpe");
+                    if(isAppInstalled) {
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.setAction("android.intent.category.LAUNCHER");
+                        intent.setClassName("com.mojang.minecraftpe", "com.mojang.minecraftpe.MainActivity");
+                        startActivity(intent);
+                    } else {
+                        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.mojang.minecraftpe");
+                        Intent i = new Intent(Intent.ACTION_VIEW,uri);
+                        startActivity(i);
+                    }
+
                 }
             });
         }
@@ -531,6 +562,17 @@ public class MainActivity extends AppCompatActivity {
             });
     }
 
+    private boolean appInstalledOrNot(String uri) {
+        PackageManager pm = getPackageManager();
+        try {
+            pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+
+        return false;
+    }
+
     public void download() {
         try {
             // URL設定
@@ -631,4 +673,13 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    //sorts based on the files name
+    public class SortFileName implements Comparator<File> {
+        @Override
+        public int compare(File f1, File f2) {
+            return f1.getName().compareTo(f2.getName());
+        }
+    }
+
 }
